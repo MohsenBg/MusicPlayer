@@ -4,7 +4,7 @@ import { AntDesign } from "@expo/vector-icons";
 import color from "../misc/color";
 
 const PlayerButton: React.FC<any> = (props) => {
-  const { iconType, size = 50, IconColor = color.FONT, onPress } = props;
+  const { iconType, size = 40, IconColor = "white", onPress } = props;
 
   const getIconName = (Type: any) => {
     switch (Type) {
@@ -29,8 +29,12 @@ const PlayerButton: React.FC<any> = (props) => {
   return (
     <AntDesign
       name={getIconName(iconType)}
-      size={size}
-      color={IconColor}
+      size={iconType === "PLAY" || iconType === "PAUSE" ? 70 : size}
+      color={
+        iconType === "PLAY" || iconType === "PAUSE"
+          ? "rgba(80, 143, 179,10)"
+          : IconColor
+      }
       {...props}
       onPress={onPress}
     />

@@ -10,6 +10,7 @@ interface State {
   currentIndex: any;
   playBackDuration: any;
   playBackPosition: any;
+  onPlayBackStatusUpdate: any;
 }
 
 const initialState: State = {
@@ -20,6 +21,7 @@ const initialState: State = {
   currentIndex: null,
   playBackDuration: null,
   playBackPosition: null,
+  onPlayBackStatusUpdate: null,
 };
 
 export default (state = initialState, Action: ActionSelectedAudios) => {
@@ -44,6 +46,9 @@ export default (state = initialState, Action: ActionSelectedAudios) => {
 
     case ActionTypeSelectedAudios.PLAY_BACK_DURATION:
       return { ...state, playBackDuration: Action.payload };
+
+    case ActionTypeSelectedAudios.ONPLAY_BACK_STATUS_UPDATE:
+      return { ...state, onPlayBackStatusUpdate: Action.payload };
 
     default:
       return state;

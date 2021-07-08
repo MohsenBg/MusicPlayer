@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Text, View } from "react-native";
+import { Dimensions, Text, View, ImageBackground } from "react-native";
 import Screen from "../Components/Screen";
 import { StyleSheet } from "react-native-auto-stylesheet";
 import color from "../misc/color";
@@ -12,8 +12,11 @@ import { pause, play, PlayNext, resume } from "../misc/AudioController";
 import { ActionTypeSelectedAudios } from "../Redux/SelectedAudios/ActionTypeSelectedAudios";
 import { Audio } from "expo-av";
 import { storeAudioForNextOpening } from "../misc/helper";
+import { log } from "react-native-reanimated";
 
 const Player = () => {
+  const [currentPosition, setCurrentPosition] = useState(0);
+
   const dispatch = useDispatch();
 
   //redux Value
@@ -52,6 +55,10 @@ const Player = () => {
     (state: initialState) => state.SelectedAudio.playBackPosition
   );
 
+  const onPlayBackStatusUpdate = useSelector(
+    (state: initialState) => state.SelectedAudio.onPlayBackStatusUpdate
+  );
+
   const millisToMinutesAndSeconds = (millis: number) => {
     if (millis !== null && millis !== undefined) {
       let Number = millis;
@@ -77,6 +84,7 @@ const Player = () => {
       const PlaybackObj = new Audio.Sound();
       const audio = currentAudio;
       const status = await play(PlaybackObj, audio.uri);
+      playBackObj.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
       dispatch({
         type: ActionTypeSelectedAudios.PLAY_BACK_OBJ,
         payload: PlaybackObj,
@@ -91,17 +99,21 @@ const Player = () => {
         type: ActionTypeSelectedAudios.CURRENT_INDEX,
         payload: currentIndex,
       });
+
       return await storeAudioForNextOpening(audio, currentIndex);
     }
     //pause
     if (soundObj && soundObj.isPlaying) {
       const status = await pause(playBackObj);
+      playBackObj.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
       dispatch({ type: ActionTypeSelectedAudios.SOUND_OBJ, payload: status }),
         dispatch({ type: ActionTypeSelectedAudios.IS_PLAYING, payload: false });
     }
     //resume
     if (soundObj && !soundObj.isPlaying) {
       const status = await resume(playBackObj);
+      playBackObj.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
+
       dispatch({ type: ActionTypeSelectedAudios.SOUND_OBJ, payload: status }),
         dispatch({ type: ActionTypeSelectedAudios.IS_PLAYING, payload: true });
     }
@@ -134,6 +146,7 @@ const Player = () => {
         status = await play(playBackObj, audio.uri);
       }
     }
+    playBackObj.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
 
     dispatch({
       type: ActionTypeSelectedAudios.PLAY_BACK_OBJ,
@@ -178,7 +191,7 @@ const Player = () => {
         status = await play(playBackObj, audio.uri);
       }
     }
-
+    playBackObj.setOnPlaybackStatusUpdate(onPlayBackStatusUpdate);
     dispatch({
       type: ActionTypeSelectedAudios.PLAY_BACK_OBJ,
       payload: playBackObj,
@@ -199,51 +212,75 @@ const Player = () => {
 
   return (
     <Screen>
-      <View style={styles.Container}>
-        <Text style={styles.audioCount}>{`${
-          currentIndex + 1
-        }/${totalCount}`}</Text>
-        <View style={styles.midBannerContainer}>
-          <MaterialCommunityIcons
-            name="music-circle"
-            size={300}
-            color={isPlaying ? color.ACTIVE_BG : color.FONT_MEDIUM}
-          />
-        </View>
-        <View style={styles.audioPlayerContainer}></View>
-        <Text numberOfLines={1} style={styles.audioTextTitle}>
-          {currentAudio.filename}
-        </Text>
-        <View style={styles.sliderContainer}>
-          <Text style={styles.timeDuration}>
-            {playBackPosition !== null
-              ? millisToMinutesAndSeconds(playBackPosition)
-              : "0:00"}
+      <ImageBackground
+        source={require("../../assets/defultImageMusicPlayer/3.jpg")}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <View style={styles.Container}>
+          <Text style={styles.audioCount}>{`${
+            currentIndex + 1
+          }/${totalCount}`}</Text>
+          <Text numberOfLines={1} style={styles.audioTextTitle}>
+            {currentAudio.filename}
           </Text>
+          <View style={styles.midBannerContainer}>
+            <View>
+              <MaterialCommunityIcons
+                name="music-circle"
+                size={Width - 50}
+                color={isPlaying ? "yellow" : "white"}
+              />
+              <View style={styles.PlayPause}>
+                <PlayerButton
+                  onPress={handelPlayAndPause}
+                  iconType={isPlaying ? "PLAY" : "PAUSE"}
+                />
+              </View>
+            </View>
+            <View style={styles.audioControllers}>
+              <PlayerButton
+                iconType="PREV"
+                style={{ paddingHorizontal: 60 }}
+                onPress={handelPrevious}
+              />
 
-          <Slider
-            style={styles.slider}
-            minimumValue={0}
-            maximumValue={1}
-            value={calculateSeeBar()}
-            minimumTrackTintColor={color.FONT_MEDIUM}
-            maximumTrackTintColor={color.ACTIVE_BG}
-            thumbTintColor="orange"
-          />
-          <Text style={styles.timeDuration}>
-            {millisToMinutesAndSeconds(playBackDuration)}
-          </Text>
+              <PlayerButton
+                iconType="NEXT"
+                style={{ paddingHorizontal: 60 }}
+                onPress={handelNext}
+              />
+            </View>
+            <View style={styles.sliderContainer}>
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={calculateSeeBar()}
+                minimumTrackTintColor={"red"}
+                maximumTrackTintColor={"white"}
+                thumbTintColor="orange"
+                onValueChange={(value: number) => {
+                  setCurrentPosition(value * playBackPosition);
+                }}
+              />
+            </View>
+            <View style={styles.timeDurationContainer}>
+              <View>
+                <Text style={styles.timeDuration}>
+                  {playBackPosition !== null
+                    ? millisToMinutesAndSeconds(playBackPosition)
+                    : "0:00"}
+                </Text>
+              </View>
+              <View style={{ position: "absolute", right: 0 }}>
+                <Text style={styles.timeDuration}>
+                  {millisToMinutesAndSeconds(playBackDuration)}
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
-        <View style={styles.audioControllers}>
-          <PlayerButton iconType="PREV" onPress={handelPrevious} />
-          <PlayerButton
-            onPress={handelPlayAndPause}
-            style={{ marginHorizontal: 40 }}
-            iconType={isPlaying ? "PLAY" : "PAUSE"}
-          />
-          <PlayerButton iconType="NEXT" onPress={handelNext} />
-        </View>
-      </View>
+      </ImageBackground>
     </Screen>
   );
 };
@@ -251,7 +288,6 @@ const Player = () => {
 export default Player;
 
 const Width = Dimensions.get("window").width;
-
 const styles = StyleSheet.create({
   Container: {
     flex: 1,
@@ -273,17 +309,28 @@ const styles = StyleSheet.create({
   },
   audioTextTitle: {
     fontSize: 16,
-    color: color.FONT,
+    color: "rgba(255, 255, 255,0.6)",
     padding: 15,
+  },
+  PlayPause: {
+    backgroundColor: "white",
+    borderRadius: 60,
+    borderBottomColor: "orange",
+    borderTopColor: "red",
+    borderLeftColor: "rgb(158, 255, 255)",
+    borderRightColor: "rgb(158, 255, 255)",
+    borderWidth: 5,
+    position: "absolute",
+    bottom: -10,
+    alignSelf: "center",
   },
   sliderContainer: {
     flexDirection: "row",
-
     justifyContent: "center",
     alignItems: "center",
   },
   slider: {
-    width: Width - 150,
+    width: Width - 60,
     height: 40,
   },
   audioControllers: {
@@ -293,8 +340,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
   },
+  timeDurationContainer: {
+    flexDirection: "row",
+    width: Width - 60,
+  },
   timeDuration: {
     fontSize: 14,
-    color: color.FONT_MEDIUM,
+    color: "white",
   },
 });

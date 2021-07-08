@@ -5,7 +5,7 @@ import {
   StyleSheet,
   Dimensions,
   TouchableWithoutFeedback,
-  SafeAreaView,
+  ImageBackground,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import color from "../misc/color";
@@ -48,54 +48,123 @@ const AudioListItem: React.FC<any> = ({
   activeListItem,
 }) => {
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={OnAudioPress}>
-          <View style={styles.leftContainer}>
-            <View
-              style={[
-                styles.thumbnail,
-                {
-                  backgroundColor: activeListItem
-                    ? color.ACTIVE_BG
-                    : color.FONT_LIGHT,
-                },
-              ]}
-            >
-              <Text style={styles.thumbnailText}>
-                {activeListItem
-                  ? renderPlayPauseIcon(isPlaying)
-                  : getThumbnailText(title)}
-              </Text>
-            </View>
-            <View style={styles.titleContainer}>
-              <Text numberOfLines={1} style={styles.title}>
-                {title}
-              </Text>
-              <Text style={styles.timeText}>{convertTime(duration)}</Text>
+    <View>
+      {activeListItem ? (
+        <ImageBackground
+          source={require("../../assets/gradientImage/LightPrepel.png")}
+          style={styles.ImageBackground}
+          imageStyle={{ borderRadius: 50 }}
+        >
+          <View
+            style={activeListItem ? styles.ActiveContainer : styles.container}
+          >
+            <TouchableWithoutFeedback onPress={OnAudioPress}>
+              <View style={styles.leftContainer}>
+                <View
+                  style={[
+                    styles.thumbnail,
+                    {
+                      backgroundColor: activeListItem
+                        ? color.ACTIVE_BG
+                        : color.FONT_LIGHT,
+                    },
+                  ]}
+                >
+                  <Text style={styles.thumbnailText}>
+                    {activeListItem
+                      ? renderPlayPauseIcon(isPlaying)
+                      : getThumbnailText(title)}
+                  </Text>
+                </View>
+                <View style={styles.titleContainer}>
+                  <Text numberOfLines={1} style={styles.title}>
+                    {title}
+                  </Text>
+                  <Text style={styles.timeText}>{convertTime(duration)}</Text>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+            <View style={styles.rightContainer}>
+              <Entypo
+                onPress={onOptionPress}
+                name="dots-three-horizontal"
+                size={20}
+                color="white"
+                style={{ padding: 10 }}
+              />
             </View>
           </View>
-        </TouchableWithoutFeedback>
-        <View style={styles.rightContainer}>
-          <Entypo
-            onPress={onOptionPress}
-            name="dots-three-vertical"
-            size={20}
-            color={color.FONT_MEDIUM}
-            style={{ padding: 10 }}
-          />
+        </ImageBackground>
+      ) : (
+        <View
+          style={activeListItem ? styles.ActiveContainer : styles.container}
+        >
+          <TouchableWithoutFeedback onPress={OnAudioPress}>
+            <View style={styles.leftContainer}>
+              <View
+                style={[
+                  styles.thumbnail,
+                  {
+                    backgroundColor: activeListItem
+                      ? color.ACTIVE_BG
+                      : color.FONT_LIGHT,
+                  },
+                ]}
+              >
+                <Text style={styles.thumbnailText}>
+                  {activeListItem
+                    ? renderPlayPauseIcon(isPlaying)
+                    : getThumbnailText(title)}
+                </Text>
+              </View>
+              <View style={styles.titleContainer}>
+                <Text numberOfLines={1} style={styles.title}>
+                  {title}
+                </Text>
+                <Text style={styles.timeText}>{convertTime(duration)}</Text>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+          <View style={styles.rightContainer}>
+            <Entypo
+              onPress={onOptionPress}
+              name="dots-three-horizontal"
+              size={20}
+              color="cyan"
+              style={{ padding: 10 }}
+            />
+          </View>
         </View>
-      </View>
-      <View style={styles.separator} />
-    </SafeAreaView>
+      )}
+    </View>
   );
 };
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
+  ImageBackground: {
+    width: width - 35,
+    height: 70,
+    marginTop: 20,
+    paddingLeft: 25,
+    paddingBottom: 10,
+    flexDirection: "row",
+    alignSelf: "center",
+  },
   container: {
+    marginTop: 20,
+    paddingTop: 10,
     flexDirection: "row",
     alignSelf: "center",
     width: width - 80,
+    paddingBottom: 20,
+  },
+  ActiveContainer: {
+    marginTop: 20,
+    paddingTop: 10,
+    flexDirection: "row",
+    alignSelf: "center",
+    width: width - 80,
+    paddingBottom: 20,
   },
   leftContainer: {
     flexDirection: "row",
@@ -128,16 +197,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    color: color.FONT,
+    color: "white",
   },
-  separator: {
-    width: width - 80,
-    backgroundColor: "#333",
-    opacity: 0.3,
-    height: 0.5,
-    alignSelf: "center",
-    marginTop: 10,
-  },
+
   timeText: {
     fontSize: 14,
     color: color.FONT_LIGHT,

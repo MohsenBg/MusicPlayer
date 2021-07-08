@@ -84,6 +84,18 @@ export const PLAY_BACK_DURATION: any = (PlayBackDuration: any) => {
   };
 };
 
+interface onPlayBackStatusUpdate {
+  type: ActionTypeSelectedAudios.ONPLAY_BACK_STATUS_UPDATE;
+  payload: any;
+}
+
+export const ONPLAY_BACK_STATUS_UPDATE: any = (onPlayBackStatusUpdate: any) => {
+  return {
+    type: ActionTypeSelectedAudios.ONPLAY_BACK_STATUS_UPDATE,
+    payload: onPlayBackStatusUpdate,
+  };
+};
+
 export type ActionSelectedAudios =
   | playBackObj
   | SoundObj
@@ -91,4 +103,5 @@ export type ActionSelectedAudios =
   | isPlaying
   | currentIndex
   | PlayBackPosition
-  | PlayBackDuration;
+  | PlayBackDuration
+  | onPlayBackStatusUpdate;

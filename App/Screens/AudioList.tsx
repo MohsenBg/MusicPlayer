@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Text, View, Dimensions, StyleSheet } from "react-native";
+import {
+  Text,
+  View,
+  Dimensions,
+  StyleSheet,
+  ImageBackground,
+} from "react-native";
 import { connect } from "react-redux";
 import { Audio } from "expo-av";
 import {
@@ -20,10 +26,12 @@ import {
   is_Playing,
   PLAY_BACK_DURATION,
   PLAY_BACK_POSITION,
+  ONPLAY_BACK_STATUS_UPDATE,
 } from "../Redux/SelectedAudios/ActionSelectedAudios";
 import { storeAudioForNextOpening } from "../misc/helper";
 import AsyncStore from "@react-native-async-storage/async-storage";
 import { initialState } from "../Redux/Store";
+import SearchBar from "../Components/SearchBar";
 
 interface Audios {
   albumId: string;
@@ -74,6 +82,7 @@ type Props = {
   DispatchCurrentAudio: any;
   DispatchIsPlaying: any;
   DispatchCurrentIndex: any;
+  DispatchOnPlayBackStatusUpdate: any;
 
   //Dispatch selectedAudio duration
   DispatchPlayBackDuration: any;
@@ -272,6 +281,7 @@ class AudioList extends React.Component<Props, State> {
     let update = false;
     if (!update) {
       this.loadPreviousAudio();
+      this.props.DispatchOnPlayBackStatusUpdate(this.onPlayBackStatusUpdate);
       update = true;
     }
   }
@@ -279,32 +289,62 @@ class AudioList extends React.Component<Props, State> {
   render() {
     return (
       <Screen>
-        {this.state.dataProvider !== "" && (
-          <RecyclerListView
-            dataProvider={this.state.dataProvider}
-            layoutProvider={this.layoutProvider}
-            rowRenderer={this.rowRenderer}
-            extendedState={{ isPlaying: this.props.isPlaying }}
-          />
-        )}
-        <OptionModels
-          onPlayPress={() => console.log("onPlayPress")}
-          onPlayListPress={() => console.log("onPlayListPress")}
-          currentItem={this.currentItem}
-          onClose={() =>
-            this.setState({ ...this.state, optionModelVisible: false })
-          }
-          visible={this.state.optionModelVisible}
-        />
+        <View style={styles.top}>
+          <ImageBackground
+            source={require("../../assets/defultImageMusicPlayer/1.jpg")}
+            style={{ width: "100%", height: "100%", flex: 1 }}
+          >
+            <View style={styles.ComponentsSearchBar}>
+              <SearchBar />
+            </View>
+          </ImageBackground>
+        </View>
+        <ImageBackground
+          source={require("../../assets/gradientImage/DarkPerpel.jpg")}
+          style={{ width: "100%", height: "100%", flex: 1 }}
+        >
+          <View style={styles.bottom}>
+            {this.state.dataProvider !== "" && (
+              <RecyclerListView
+                dataProvider={this.state.dataProvider}
+                layoutProvider={this.layoutProvider}
+                rowRenderer={this.rowRenderer}
+                extendedState={{ isPlaying: this.props.isPlaying }}
+              />
+            )}
+            <OptionModels
+              onPlayPress={() => console.log("onPlayPress")}
+              onPlayListPress={() => console.log("onPlayListPress")}
+              currentItem={this.currentItem}
+              onClose={() =>
+                this.setState({ ...this.state, optionModelVisible: false })
+              }
+              visible={this.state.optionModelVisible}
+            />
+          </View>
+        </ImageBackground>
       </Screen>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  MineMap: {
-    backgroundColor: "black",
-    marginTop: 30,
+  top: {
+    position: "relative",
+    flex: 0.5,
+  },
+  bottom: {
+    borderTopWidth: 2,
+    borderColor: "white",
+    flex: 1.5,
+    paddingBottom: 10,
+  },
+  ComponentsSearchBar: {
+    alignSelf: "center",
+    position: "absolute",
+    bottom: 0,
+    zIndex: 3,
+    marginBottom: 20,
   },
   AudioList: {
     color: "white",
@@ -348,6 +388,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
 
     DispatchPlayBackDuration: (playBackDuration: any) =>
       dispatch(PLAY_BACK_DURATION(playBackDuration)),
+
+    DispatchOnPlayBackStatusUpdate: (onPlayBackStatusUpdate: any) =>
+      dispatch(ONPLAY_BACK_STATUS_UPDATE(onPlayBackStatusUpdate)),
   };
 };
 
